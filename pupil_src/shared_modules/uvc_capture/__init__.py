@@ -89,6 +89,12 @@ def autoCreateCapture(src,size=(640,480),fps=30,timestamps=None,timebase = None)
             raise FileCaptureError('Could not locate VideoFile %s'%src)
         logger.info("Using %s as video source"%src)
         return File_Capture(src,timestamps=timestamps)
+    elif src_type is dict:
+	if os_name == "Linux":
+		from ids_capture import IdsCapture
+		logger.info("Using %s as video source", src['type'])
+		return IdsCapture(size, fps, timebase=timebase)
+	return FakeCapture(size,fps,timebase=timebase)
     else:
         logger.error("autoCreateCapture: Could not create capture, wrong src_type")
         return FakeCapture(size,fps,timebase=timebase)

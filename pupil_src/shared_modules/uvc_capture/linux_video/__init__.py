@@ -18,9 +18,6 @@ from time import sleep
 import logging
 logger = logging.getLogger(__name__)
 
-
-
-
 class Camera_Capture(object):
     """docstring for uvcc_camera"""
     def __init__(self,cam,size=(640,480),fps=None,timebase=None):

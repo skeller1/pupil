@@ -1,5 +1,6 @@
 import os,sys
 import cv2
+import ids
 import numpy as np
 from time import time,sleep
 
@@ -26,22 +27,26 @@ class Frame(object):
     def __init__(self, timestamp,img,index=None,compressed_img=None, compressed_pix_fmt=None):
         self.timestamp = timestamp
         self.index = index
-        self.img = img
+        #self.img = img
+	#ids_img, ids_meta = self.cam.next() 	
+	self.img = cv2.cvtColor(img, cv2.COLOR_RGB2BGR)
         self.compressed_img = compressed_img
         self.compressed_pix_fmt = compressed_pix_fmt
 
 
-class FakeCapture(object):
+class IdsCapture(object):
     """docstring for FakeCapture"""
     def __init__(self, size=(640,480),fps=30,timestamps=None,timebase=None):
-	super(FakeCapture, self).__init__()
+        super(IdsCapture, self).__init__()
         self.size = size
         self.fps = c_float(fps)
         self.timestamps = timestamps
         self.presentation_time = time()
-
+	self.cam = ids.Camera()
+	#self.cam.auto_exposure = True
+	self.cam.continuous_capture = True
         self.make_img()
-
+	logger.error(self)
 
         if timebase == None:
             logger.debug("Capture will run with default system timebase")
@@ -54,10 +59,14 @@ class FakeCapture(object):
             self.timebase = c_double(0)
 
     def make_img(self):
-        c_w ,c_h = max(1,self.size[0]/20),max(1,self.size[1]/20)
-        coarse = np.random.randint(0,255,size=(c_h,c_w,3)).astype(np.uint8)
+        #c_w ,c_h = max(1,self.size[0]/20),max(1,self.size[1]/20)
+        #coarse = np.random.randint(0,255,size=(c_h,c_w,3)).astype(np.uint8)
         # self.img = np.ones((size[1],size[0],3),dtype=np.uint8)
-        self.img = cv2.resize(coarse,self.size,interpolation=cv2.INTER_NEAREST)
+        #self.img = cv2.resize(coarse,self.size,interpolation=cv2.INTER_NEAREST)
+	ids_img, ids_meta = self.cam.next()	
+	#bgr_img = 	
+	#self.img = cv2.cvtColor(ids_img, cv2.COLOR_RGB2BGR)
+	self.img = cv2.cvtColor(ids_img, cv2.COLOR_RGB2GRAY)
 
     def fastmode(self):
         self.fps.value = 2000
@@ -68,7 +77,9 @@ class FakeCapture(object):
         wait = max(0,1./self.fps.value - spent)
         sleep(wait)
         self.presentation_time = time()
-        return Frame(time()-self.timebase.value,self.img.copy())
+	ids_img, ids_meta = self.cam.next()
+	return Frame(time()-self.timebase.value,ids_img)
+        #return Frame(time()-self.timebase.value,self.img.copy())
 
     def get_size(self):
         return self.size
