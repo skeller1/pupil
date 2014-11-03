@@ -78,7 +78,8 @@ class IdsCapture(object):
         sleep(wait)
         self.presentation_time = time()
 	ids_img, ids_meta = self.cam.next()
-	return Frame(time()-self.timebase.value,ids_img)
+	# changed using copy	
+	return Frame(time()-self.timebase.value,ids_img.copy())
         #return Frame(time()-self.timebase.value,self.img.copy())
 
     def get_size(self):
